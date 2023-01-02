@@ -8,8 +8,7 @@ import com.lexisnexis.tms.entity.EmpEntity;
 @Repository
 public interface EmpRepo extends CrudRepository<EmpEntity, String> {
 	
-	public EmpEntity findByUsername(String username);
+	public EmpEntity findByUserName(String username);
 	
-	public EmpEntity deleteByUsername(String username);
 	
 }
