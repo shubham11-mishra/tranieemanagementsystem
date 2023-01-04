@@ -9,6 +9,8 @@ import com.lexisnexis.tms.entity.EmpEntity;
 public interface EmpRepo extends CrudRepository<EmpEntity, String> {
 	
 	public EmpEntity findByUserName(String username);
+
+	public EmpEntity findByPassword(String password);
 	
 	
 }

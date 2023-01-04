@@ -33,6 +33,17 @@ public class EmpController {
 	
 	@Autowired
 	EmpService empservice;
+	
+	@GetMapping("/home")
+	public String page() {
+		return "This is home page";
+	}
+	
+	@GetMapping("/getCountOfMethod")
+	public String getCount() {
+		empservice.getCount();
+		return "result";
+	}
 
 	@GetMapping("/getAllUserDetails")
 	public ResponseEntity<List<EmpEntity>>  fetchAllEmpDetail()throws UserNotFoundException{
@@ -62,4 +73,11 @@ public class EmpController {
 		 empservice.updateUser(username, em);
 		 return "User Record UpDated Properly";
 	}	
+	
+	@PostMapping("/loginUser")
+	public String loginUser(@RequestBody EmpEntity emp) throws UserNotFoundException {
+		empservice.loginUser(emp);
+		return "Login SuccessFully";
+	}
+	
 }
