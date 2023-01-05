@@ -42,7 +42,7 @@ public class EmpServiceImpl implements EmpService {
 			throw new UserNotFoundException("We Dont Have Any employee yet");
 		}
 	}
-
+			
 	@Override
 	public User getDataByUsername(String username) throws UserNotFoundException {
 
