@@ -3,14 +3,14 @@ package com.lexisnexis.tms.repository;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
-import com.lexisnexis.tms.entity.EmpEntity;
+import com.lexisnexis.tms.entity.User;
 
 @Repository
-public interface EmpRepo extends CrudRepository<EmpEntity, String> {
+public interface EmpRepo extends CrudRepository<User, String> {
 	
-	public EmpEntity findByUserName(String username);
+	public User findByUserName(String username);
 
-	public EmpEntity findByPassword(String password);
+	public User findByPassword(String password);
 	
 	
 }

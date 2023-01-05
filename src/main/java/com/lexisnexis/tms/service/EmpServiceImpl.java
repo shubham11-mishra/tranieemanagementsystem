@@ -7,8 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import com.lexisnexis.tms.encrypt.PasswEncrypt;
-import com.lexisnexis.tms.entity.EmpEntity;
-import com.lexisnexis.tms.entity.LoginTable;
+import com.lexisnexis.tms.entity.User;
+import com.lexisnexis.tms.entity.UserLogin;
 import com.lexisnexis.tms.exception.UserAlreadyHasAccount;
 import com.lexisnexis.tms.exception.UserNotFoundException;
 import com.lexisnexis.tms.repository.EmpRepo;
@@ -17,11 +17,9 @@ import com.lexisnexis.tms.repository.LoginRepo;
 @Service
 public class EmpServiceImpl implements EmpService {
 
-	int countFetchAllEmpDetailSuccess=0;
-	int countFetchAllEmpDetailFailed=0;
 
 	@Autowired
-	LoginTable logintable;
+	UserLogin logintable;
 
 	@Autowired
 	LoginRepo  loginrepo;
@@ -33,45 +31,62 @@ public class EmpServiceImpl implements EmpService {
 	PasswEncrypt PasswEncrypt;
 
 	@Override
-	public List<EmpEntity> fetchAllEmpDetail() throws UserNotFoundException {
+	public List<User> fetchAllEmpDetail() throws UserNotFoundException {
 		long count=emprepo.count();		
-		if(count!=0) {
-			countFetchAllEmpDetailSuccess++;
-			return  (List<EmpEntity>)emprepo.findAll();
-		}else {
-			countFetchAllEmpDetailFailed++;
+		if(count!=0)
+		{
+			return  (List<User>)emprepo.findAll();
+		}
+		else
+		{
 			throw new UserNotFoundException("We Dont Have Any employee yet");
 		}
 	}
 
 	@Override
-	public EmpEntity getDataByUsername(String username) throws UserNotFoundException {	
-		EmpEntity emp=emprepo.findByUserName(username); 
+	public User getDataByUsername(String username) throws UserNotFoundException {
 
-		if(emp!=null) {
+		User emp=emprepo.findByUserName(username); 
+
+		if(emp!=null)
+		{
 			return emp;
-		}else {
+		}
+		else
+		{
 			throw new UserNotFoundException("Usrname name does not Exist"+" "+username);
 		}
 	}
 
 	@Override
 	public void deleteDataByUsername(String username) throws UserNotFoundException {
-		EmpEntity emp=emprepo.findByUserName(username); 
-		LoginTable login=loginrepo.findByUserName(username);
-		
-		if(emp!=null) {
-			emprepo.deleteById(username);
-		} 
-		else {
-			throw new UserNotFoundException("Username name does not Exist"+" "+username);
+
+		User emp=emprepo.findByUserName(username); 
+
+		UserLogin login=loginrepo.findByUserName(username);
+
+		if(emp!=null)
+		{
+			if(login!=null && login.getLoginStatus().equals("Y")) {
+				emprepo.deleteById(username);
+				loginrepo.deleteById(username);
+			} 
+			else
+			{
+				throw new UserNotFoundException("Else user Has not loginIn"+" "+username);
+			}	
 		}
+		else
+		{
+			throw new UserNotFoundException("user has not register");
+		}
+
 	}
 
 	@Override
-	public EmpEntity addUser(EmpEntity emp) throws UserAlreadyHasAccount, NoSuchAlgorithmException {
+	public User addUser(User emp) throws UserAlreadyHasAccount, NoSuchAlgorithmException {
 
-		EmpEntity emp1=emprepo.findByUserName(emp.getUserName());
+		User emp1=emprepo.findByUserName(emp.getUserName());
 		if(emp1!=null) {
 			throw new UserAlreadyHasAccount("Employee Already have Account with This Username"+" "+emp1.getUserName());
 		}else {
@@ -81,8 +96,8 @@ public class EmpServiceImpl implements EmpService {
 	}
 
 	@Override
-	public EmpEntity updateUser(@PathVariable String username,@RequestBody EmpEntity em) throws UserNotFoundException, NoSuchAlgorithmException{
-		EmpEntity emp=emprepo.findByUserName(username);
+	public User updateUser(@PathVariable String username,@RequestBody User em) throws UserNotFoundException, NoSuchAlgorithmException{
+		User emp=emprepo.findByUserName(username);
 
 		if(emp!=null) {
 			em.setPassword(PasswEncrypt.encryptPass(em.getPassword()));
@@ -95,31 +110,14 @@ public class EmpServiceImpl implements EmpService {
 	}
 
 	@Override
-	public String getCount() {
-		return "Get All method is called"+ countFetchAllEmpDetailSuccess 	+"times";
-	}
+	public UserLogin loginUser(@RequestBody User emp,
+			@RequestBody UserLogin userlogin) throws UserNotFoundException {
+
+		User user=emprepo.findByUserName(userlogin.getUserName());	
 
 
-	@Override
-	public LoginTable loginUser(@RequestBody EmpEntity emp) throws UserNotFoundException {
-		EmpEntity user=emprepo.findByUserName(emp.getUserName());
-		if(user!=null) {
-			if(user.getUserName().equalsIgnoreCase(emp.getUserName()) && user.getPassword().equalsIgnoreCase(emp.getPassword())) {
-				logintable.setUserName(user.getUserName());
-				logintable.setCount(0);
-				logintable.setStatus(true);
-				logintable.setLoginAt(logintable.getLoginAt());
-				logintable.onSave();
-				return loginrepo.save(logintable);
-			}
-			else
-			{
-				throw new UserNotFoundException("Invalid Password");
-			}	
-		}
-		else
-		{
-			throw new UserNotFoundException("Invalid Password");
-		}	
+
+		userlogin.setUserName(emp.getUserName());
+		return loginrepo.save(userlogin);
 	}
 }

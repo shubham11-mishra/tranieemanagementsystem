@@ -19,7 +19,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.lexisnexis.tms.encrypt.PasswEncrypt;
-import com.lexisnexis.tms.entity.EmpEntity;
+import com.lexisnexis.tms.entity.User;
+import com.lexisnexis.tms.entity.UserLogin;
 import com.lexisnexis.tms.exception.UserAlreadyHasAccount;
 import com.lexisnexis.tms.exception.UserNotFoundException;
 import com.lexisnexis.tms.service.EmailSenderMail;
@@ -29,7 +30,7 @@ import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 
 @RestController
-public class EmpController {
+public class UserController {
 	
 	@Autowired
 	EmpService empservice;
@@ -38,20 +39,14 @@ public class EmpController {
 	public String page() {
 		return "This is home page";
 	}
-	
-	@GetMapping("/getCountOfMethod")
-	public String getCount() {
-		empservice.getCount();
-		return "result";
-	}
 
 	@GetMapping("/getAllUserDetails")
-	public ResponseEntity<List<EmpEntity>>  fetchAllEmpDetail()throws UserNotFoundException{
+	public ResponseEntity<List<User>>  fetchAllEmpDetail()throws UserNotFoundException{
 		return new ResponseEntity<>(this.empservice.fetchAllEmpDetail(),HttpStatus.ACCEPTED);
 	}
 
 	@GetMapping("/getDataByUsername/{username}")
-	public ResponseEntity<  EmpEntity> getData(@PathVariable String username) throws UserNotFoundException {
+	public ResponseEntity<User> getData(@PathVariable String username) throws UserNotFoundException {
 		return new ResponseEntity<>(empservice.getDataByUsername(username),HttpStatus.OK);
 	}
 	
@@ -63,20 +58,20 @@ public class EmpController {
 	}
 
 	@PostMapping("/addUser")
-	public String addUser(@RequestBody @Valid EmpEntity emp) throws UserAlreadyHasAccount, NoSuchAlgorithmException {
+	public String addUser(@RequestBody @Valid User emp) throws UserAlreadyHasAccount, NoSuchAlgorithmException {
 		empservice.addUser(emp);
 		return "User Added";
 	}
 	
 	@PutMapping("/UpdateUser/{username}")
-	public String updateUser(@PathVariable String username,@RequestBody EmpEntity em) throws UserNotFoundException, NoSuchAlgorithmException {
+	public String updateUser(@PathVariable String username,@RequestBody User em) throws UserNotFoundException, NoSuchAlgorithmException {
 		 empservice.updateUser(username, em);
 		 return "User Record UpDated Properly";
 	}	
 	
 	@PostMapping("/loginUser")
-	public String loginUser(@RequestBody EmpEntity emp) throws UserNotFoundException {
-		empservice.loginUser(emp);
+	public String loginUser(@RequestBody User emp,@RequestBody UserLogin userlogin) throws UserNotFoundException {
+		empservice.loginUser(emp,userlogin);
 		return "Login SuccessFully";
 	}
 	
